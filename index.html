@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>chat-app</title>
+  <style>
+    html,
+    body,
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .msg-window {
+      flex: 1;
+      overflow-x: hidden;
+    }
+
+    .msg-window .name {
+      font-weight: bold;
+    }
+
+    .msg-window li {
+      height: 40px;
+      line-height: 40px;
+      font-size: 14px;
+      padding-left: 8px;
+    }
+
+    .msg-window li:nth-child(odd) {
+      background-color: #09f;
+    }
+
+    .msg-form {
+      height: 40px;
+      line-height: 40px;
+      border: 1px solid #dedede;
+      display: flex;
+      width: 100%;
+    }
+
+    .msg-form input {
+      border: 1px solid #dedede;
+    }
+
+    .msg-form input#msg_input {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <ul class="msg-window">
+
+
+    </ul>
+    <div class="msg-form">
+      name: <input type="text" id="name">
+      message: <input type="text" id="msg_input">
+      <button onclick="sendMsg(this)">发送框</button>
+    </div>
+  </div>
+  <!-- 注意：要在服务端引入静态资源目录必须设置static，因为express是服务端，有一个安全机制 -->
+  <script src="/static/socket.io.js"></script>
+  <script>
+    const msgWidow = document.querySelector(".msg-window")
+    const nameNode = document.querySelector("#name")
+    const messageNode = document.querySelector("#msg_input")
+    var socket = io();
+    socket.emit('login', "我进入房间了")
+    // 接收服务器端userlogin发送过来的消息
+    socket.on("userlogin", msg => {
+      // console.log(msg)
+      const li = document.createElement("li")
+      li.innerHTML = msg
+      msgWidow.appendChild(li)
+    })
+
+    socket.on("receiveMsg", msg => {
+      // console.log(msg)
+      const li = document.createElement("li")
+      li.innerHTML = `<span class="name">${msg.name}说:</span><span>${msg.message}</span>`
+      msgWidow.appendChild(li)
+    })
+
+    const sendMsg = e => {
+      console.log(e)
+      // 此时叠e就是一个dom对象
+      const msgData = {
+        name: nameNode.value,
+        message: messageNode.value
+      }
+      socket.emit('senMsg', msgData)
+    }
+  </script>
+</body>
+
+</html>
